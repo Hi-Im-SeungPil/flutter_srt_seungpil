@@ -1,9 +1,10 @@
+import 'dart:js';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_srt_seungpil/constants/constants.dart';
 import 'package:flutter_srt_seungpil/ui/login/login_state_holder.dart';
 import 'package:flutter_srt_seungpil/ui/login/login_view_model.dart';
-import 'package:flutter_srt_seungpil/ui/signup/sign_up_screen.dart';
-import 'package:flutter_srt_seungpil/ui/theme/theme_color.dart';
+import 'package:flutter_srt_seungpil/ui/signup/sign_up_screen_route.dart';
 import 'package:provider/provider.dart';
 
 import '../util/utils.dart';
@@ -15,6 +16,8 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     LoginScreenStateHolder holder = LoginScreenStateHolder();
     return Consumer<LoginScreenViewModel>(builder: (context, viewModel, child) {
+      holder.showErrorDialog(context, viewModel.showErrorDialog,
+          viewModel.errorDialogDismissAction, viewModel.errorMessage);
       return Scaffold(
           body: SafeArea(
         child: Column(
@@ -24,11 +27,13 @@ class LoginScreen extends StatelessWidget {
             const SRTLogo(),
             LoginScreenTextField(
                 textEditingController: holder.idEditingController,
-                identityText: "ID"),
+                identityText: getStrings(context).login_screen_text_id),
             LoginScreenTextField(
                 textEditingController: holder.pwdEditingController,
-                identityText: "PW"),
-            const LoginScreenButton(),
+                identityText: getStrings(context).login_screen_text_pw),
+            LoginScreenButton(requestLogin: () {
+              holder.loginButtonAction(viewModel.requestLogin, context);
+            }),
             Row(
               children: [
                 LoginScreenCheckBox(stateHolder: holder),
@@ -100,7 +105,12 @@ class _LoginScreenTextFieldState extends State<LoginScreenTextField> {
 
   @override
   void initState() {
-    textFieldMargin = widget.identityText == "ID" ? 97 : 12;
+    Future.delayed(Duration.zero, () {
+      textFieldMargin = widget.identityText ==
+              getStrings(context as BuildContext).login_screen_text_id
+          ? 97
+          : 12;
+    });
     super.initState();
   }
 
@@ -128,18 +138,25 @@ class _LoginScreenTextFieldState extends State<LoginScreenTextField> {
             Expanded(
                 flex: 1,
                 child: TextField(
-                  controller: widget.textEditingController,
-                  decoration: const InputDecoration(border: InputBorder.none),
-                  style:
-                      const TextStyle(fontSize: 16, color: Color(0xFF000000)),
-                ))
+                    controller: widget.textEditingController,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                    style:
+                        const TextStyle(fontSize: 16, color: Color(0xFF000000)),
+                    keyboardType: widget.identityText ==
+                            getStrings(context).login_screen_text_pw
+                        ? TextInputType.visiblePassword
+                        : TextInputType.text,
+                    obscureText: widget.identityText ==
+                        getStrings(context).login_screen_text_pw))
           ],
         ));
   }
 }
 
 class LoginScreenButton extends StatelessWidget {
-  const LoginScreenButton({super.key});
+  final Function() requestLogin;
+
+  LoginScreenButton({super.key, required this.requestLogin});
 
   @override
   Widget build(BuildContext context) {
@@ -157,13 +174,15 @@ class LoginScreenButton extends StatelessWidget {
                           const RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))))),
-                  onPressed: () {},
-                  child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                  onPressed: () {
+                    requestLogin();
+                  },
+                  child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Text(
-                        '로그인',
-                        style:
-                            TextStyle(fontSize: 16, color: Color(0xFFFFFFFF)),
+                        getStrings(context).login_screen_login,
+                        style: const TextStyle(
+                            fontSize: 16, color: Color(0xFFFFFFFF)),
                       )),
                 ))
           ],
@@ -188,10 +207,14 @@ class _LoginScreenCheckBoxState extends State<LoginScreenCheckBox> {
         child: Row(
           children: [
             FutureBuilder(
-                future: widget.stateHolder.getIsSaveId(),
+                future: widget.stateHolder.getSavedId(),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (snapshot.hasData) {
-                    widget.stateHolder.updateIsSaveId(snapshot.data);
+                    if (snapshot.data == null) {
+                      widget.stateHolder.updateIsSaveId(false);
+                    } else {
+                      widget.stateHolder.updateIsSaveId(true);
+                    }
                     return Checkbox(
                         value: widget.stateHolder.isSaveId,
                         onChanged: (value) {
@@ -209,8 +232,8 @@ class _LoginScreenCheckBoxState extends State<LoginScreenCheckBox> {
                         });
                   }
                 }),
-            const Text('아이디 저장',
-                style: TextStyle(color: Color(0xFF888888), fontSize: 12))
+            Text(getStrings(context).login_screen_save_id,
+                style: const TextStyle(color: Color(0xFF888888), fontSize: 12))
           ],
         ));
   }
@@ -224,15 +247,15 @@ class LoginScreenSignUp extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.only(right: 24),
         child: GestureDetector(
-            child: const Text(
-              '회원가입',
-              style: TextStyle(
+            child: Text(
+              getStrings(context).login_screen_sign_up,
+              style: const TextStyle(
                   color: Color(0xff666666),
                   fontSize: 17,
                   decoration: TextDecoration.underline),
             ),
             onTap: () {
-              Utils.push(context, const SignUpScreen());
+              Utils.push(context, const SignUpScreenRoute());
             }));
   }
 }

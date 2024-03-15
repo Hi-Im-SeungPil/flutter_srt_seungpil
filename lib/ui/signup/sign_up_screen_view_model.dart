@@ -29,7 +29,7 @@ class SignUpScreenViewModel extends BaseViewModel {
 
   bool get showVerifyCodeErrorDialog => _state.showVerifyCodeErrorDialog;
 
-  String get errorMessage => baseErrorMssage;
+  String get errorMessage => baseErrorMessage;
 
   bool get showErrorDialog => baseShowErrorDialog;
 
@@ -44,7 +44,7 @@ class SignUpScreenViewModel extends BaseViewModel {
       if (result.code == Constants.NETWORK_COMMUNICATION_SUCCESS) {
         _state.isSuccessSendEmailCode = true;
       } else {
-        baseErrorMssage = errorMessageMapper(ErrorType.EMAIL_SEND_ERROR);
+        baseErrorMessage = errorMessageMapper(ErrorType.EMAIL_SEND_ERROR);
         baseShowErrorDialog = true;
       }
       notifyListeners();
@@ -66,7 +66,7 @@ class SignUpScreenViewModel extends BaseViewModel {
       if (result.code == Constants.NETWORK_COMMUNICATION_SUCCESS) {
         _state.isSuccessVerifyCode = true;
       } else {
-        baseErrorMssage = result.message;
+        baseErrorMessage = result.message;
         baseShowErrorDialog = true;
       }
       notifyListeners();
@@ -90,7 +90,7 @@ class SignUpScreenViewModel extends BaseViewModel {
         _state.completeSignUp = true;
         Utils.pop(context);
       } else {
-        baseErrorMssage = result.message;
+        baseErrorMessage = result.message;
         baseShowErrorDialog = true;
       }
       notifyListeners();

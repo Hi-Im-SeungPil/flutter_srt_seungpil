@@ -1,0 +1,23 @@
+{
+  "@@locale": "ko",
+  "common_confirm" : "확인",
+
+  "login_screen_text_id" :"ID",
+  "login_screen_text_pw" :"PW",
+  "login_screen_login": "로그인",
+  "login_screen_sign_up": "회원가입",
+  "login_screen_save_id" : "아이디 저장",
+
+  "sign_up_screen_id" : "아이디",
+  "sign_up_screen_id_place_holder" : "open@openobject.net",
+  "sign_up_screen_verify" : "인증하기",
+  "sign_up_screen_verify_code" : "인증코드",
+  "sign_up_screen_name" : "이름",
+  "sign_up_screen_name_place_holder" : "김오픈",
+  "sign_up_screen_birth" : "생년월일",
+  "sign_up_screen_birth_place_holder" : "YYYYMMDD",
+  "sign_up_screen_password" : "비밀번호",
+  "sign_up_screen_password_place_holder" : "영문.숫자 조합 8자리 이상",
+  "sign_up_screen_password_confirm" : "비밀번호 확인",
+  "sign_up_screen_password_error_message" : "비밀번호는 8자리 이상입니다."
+}

@@ -9,7 +9,7 @@ class BaseViewModel extends ChangeNotifier {
   @protected
   NetworkRepository networkRepository = NetworkRepository();
   @protected
-  String baseErrorMssage = "";
+  String baseErrorMessage = "";
   @protected
   bool baseShowErrorDialog = false;
   @protected
@@ -41,7 +41,7 @@ class BaseViewModel extends ChangeNotifier {
             apiErrorAction(apiResult);
           }
           loadingState = false;
-          baseErrorMssage = errorMessageMapper(ErrorType.API_ERROR);
+          baseErrorMessage = errorMessageMapper(ErrorType.API_ERROR);
           baseShowErrorDialog = true;
           break;
         case Status.EXCEPTION:
@@ -50,7 +50,7 @@ class BaseViewModel extends ChangeNotifier {
             exceptionAction(apiResult);
           }
           loadingState = false;
-          baseErrorMssage = errorMessageMapper(ErrorType.EXCEPTION);
+          baseErrorMessage = errorMessageMapper(ErrorType.EXCEPTION);
           baseShowErrorDialog = true;
           break;
         default:
@@ -65,7 +65,7 @@ class BaseViewModel extends ChangeNotifier {
   }
 
   void errorDialogDismissAction() {
-    baseErrorMssage = "";
+    baseErrorMessage = "";
     baseShowErrorDialog = false;
   }
 }

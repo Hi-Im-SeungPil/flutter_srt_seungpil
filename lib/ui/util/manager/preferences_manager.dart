@@ -25,6 +25,11 @@ class PreferencesManager {
     }
   }
 
+  static Future<void> removeData(String key) async {
+    final prefs = await _getInstance();
+    prefs.remove(key);
+  }
+
   static Future<int> getInt(String key) async {
     final prefs = await _getInstance();
     return prefs.getInt(key) ?? 0;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_srt_seungpil/ui/common/common_dialog.dart';
 import 'package:flutter_srt_seungpil/ui/signup/sign_up_screen_state_holder.dart';
 import 'package:flutter_srt_seungpil/ui/signup/sign_up_screen_view_model.dart';
 import 'package:provider/provider.dart';
@@ -11,47 +10,38 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SignUpScreenStateHolder stateHolder = SignUpScreenStateHolder();
+    final SignUpScreenStateHolder holder = SignUpScreenStateHolder();
     return SafeArea(
         child: Scaffold(
-            appBar: signUpScreenAppBar(),
+            appBar: signUpScreenAppBar(context),
             body: SingleChildScrollView(child: Consumer<SignUpScreenViewModel>(
                 builder: (context, viewModel, child) {
-              stateHolder.showErrorDialog(context, viewModel.showErrorDialog,
+              holder.showErrorDialog(context, viewModel.showErrorDialog,
                   viewModel.errorDialogDismissAction, viewModel.errorMessage);
               return Column(children: [
                 SigneUpScreenTextField(
-                  textFieldTitle: '아이디',
-                  placeHolderText: 'open@openobject.net',
-                  controller: stateHolder.idController,
-                  buttonText: '인증하기',
-                  errorCheck: stateHolder.errorCheck,
-                  onPressed: () {
-                    stateHolder
-                        .sendEmailBtnAction(viewModel.requestSendEmailCode);
-                  },
-                  isEnable: !(viewModel.isSuccessSendEmailCode &&
-                      viewModel.isSuccessVerifyCode),
-                ),
-                SignUpButton(onPressed: () {
-                  stateHolder.signUpBtnAction(
-                      viewModel.requestSignUp,
-                      viewModel.isSuccessVerifyCode,
-                      viewModel.completeSignUp,
-                      context);
-                }),
+                    textFieldTitle: '아이디',
+                    placeHolderText: 'open@openobject.net',
+                    controller: holder.idController,
+                    buttonText: '인증하기',
+                    errorCheck: holder.errorCheck,
+                    onPressed: () {
+                      holder.sendEmailBtnAction(viewModel.requestSendEmailCode);
+                    },
+                    isEnable: !(viewModel.isSuccessSendEmailCode &&
+                        viewModel.isSuccessVerifyCode),
+                    isSuccessVerifyCode: viewModel.isSuccessVerifyCode),
                 Visibility(
-                    visible: stateHolder.isCorrectEmail &&
+                    visible: holder.isCorrectEmail &&
                         viewModel.isSuccessSendEmailCode &&
                         !viewModel.isSuccessVerifyCode,
                     child: SigneUpScreenTextField(
                       textFieldTitle: '인증코드',
                       placeHolderText: '인증코드',
-                      controller: stateHolder.codeController,
+                      controller: holder.codeController,
                       buttonText: '확인',
                       onPressed: () {
-                        stateHolder
-                            .verifyCodeBtnAction(viewModel.requestVerifyCode);
+                        holder.verifyCodeBtnAction(viewModel.requestVerifyCode);
                       },
                     )),
                 Visibility(
@@ -62,27 +52,26 @@ class SignUpScreen extends StatelessWidget {
                         SigneUpScreenTextField(
                             textFieldTitle: '이름',
                             placeHolderText: '김오픈',
-                            controller: stateHolder.nameController),
+                            controller: holder.nameController),
                         SigneUpScreenTextField(
                             textFieldTitle: '생년월일',
-                            placeHolderText: 'YYMMDD',
-                            controller: stateHolder.birthController),
+                            placeHolderText: 'YYYYMMDD',
+                            controller: holder.birthController),
                         SigneUpScreenTextField(
                             textFieldTitle: '비밀번호',
                             placeHolderText: '영문.숫자 조합 8자리 이상',
-                            controller: stateHolder.pwdController),
+                            controller: holder.pwdController,
+                            updateSignUpTask: holder.updateSignUpTask),
                         SigneUpScreenTextField(
                           textFieldTitle: '비밀번호 확인',
                           placeHolderText: '',
-                          controller: stateHolder.confirmPwdController,
-                          errorCheck: stateHolder.errorCheck,
+                          controller: holder.confirmPwdController,
+                          errorCheck: holder.errorCheck,
+                          updateSignUpTask: holder.updateSignUpTask,
                         ),
                         SignUpButton(onPressed: () {
-                          stateHolder.signUpBtnAction(
-                              viewModel.requestSignUp,
-                              viewModel.isSuccessVerifyCode,
-                              viewModel.completeSignUp,
-                              context);
+                          holder.signUpBtnAction(viewModel.requestSignUp,
+                              viewModel.isSuccessVerifyCode, context);
                         })
                       ],
                     ))
@@ -91,13 +80,15 @@ class SignUpScreen extends StatelessWidget {
   }
 }
 
-PreferredSizeWidget signUpScreenAppBar() {
+PreferredSizeWidget signUpScreenAppBar(BuildContext context) {
   return AppBar(
     title: const Center(child: Text('회원가입')),
     titleTextStyle: const TextStyle(fontSize: 18, color: Color(0xFF000000)),
     actions: [
       IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Utils.pop(context);
+          },
           icon: const Icon(
             Icons.close,
             color: Color(0xFF000000),
@@ -120,6 +111,7 @@ class SigneUpScreenTextField extends StatefulWidget {
   Function()? onPressed;
   Function(String)? updateSignUpTask;
   bool isEnable;
+  bool isSuccessVerifyCode;
 
   SigneUpScreenTextField(
       {super.key,
@@ -132,7 +124,8 @@ class SigneUpScreenTextField extends StatefulWidget {
       this.onPressed,
       this.isEnable = true,
       this.pwController,
-      this.updateSignUpTask});
+      this.updateSignUpTask,
+      this.isSuccessVerifyCode = false});
 
   @override
   State<SigneUpScreenTextField> createState() => _SigneUpScreenTextFieldState();
@@ -140,9 +133,25 @@ class SigneUpScreenTextField extends StatefulWidget {
 
 class _SigneUpScreenTextFieldState extends State<SigneUpScreenTextField> {
   late FocusNode _focusNode;
+  late TextInputType textInputType;
+  late bool obscure;
 
   @override
   void initState() {
+    switch (widget.textFieldTitle) {
+      case "비밀번호":
+      case "비밀번호 확인":
+        textInputType = TextInputType.visiblePassword;
+        obscure = true;
+        break;
+      case "생년월일":
+        textInputType = TextInputType.number;
+        obscure = false;
+        break;
+      default:
+        textInputType = TextInputType.text;
+        obscure = false;
+    }
     _focusNode = FocusNode();
     _focusNode.addListener(() {
       setState(() {
@@ -157,7 +166,9 @@ class _SigneUpScreenTextFieldState extends State<SigneUpScreenTextField> {
     });
     if (widget.textFieldTitle == "비밀번호") {
       widget.controller.addListener(() {
-        widget.updateSignUpTask!(widget.textFieldTitle);
+        if (widget.updateSignUpTask != null) {
+          widget.updateSignUpTask!(widget.textFieldTitle);
+        }
         setState(() {
           if (widget.controller.text.length < 8) {
             widget.errorText = "비밀번호는 8자리 이상입니다.";
@@ -168,8 +179,10 @@ class _SigneUpScreenTextFieldState extends State<SigneUpScreenTextField> {
       });
     }
     if (widget.textFieldTitle == "비밀번호 확인") {
-      widget.updateSignUpTask!(widget.textFieldTitle);
       widget.controller.addListener(() {
+        if (widget.updateSignUpTask != null) {
+          widget.updateSignUpTask!(widget.textFieldTitle);
+        }
         if (widget.pwController != null) {
           if (widget.controller.text.length < 8 ||
               widget.controller.text != widget.pwController!.text) {
@@ -198,13 +211,16 @@ class _SigneUpScreenTextFieldState extends State<SigneUpScreenTextField> {
                   textAlign: TextAlign.start,
                 )),
             TextField(
-              keyboardType: widget.textFieldTitle == "생년월일"
-                  ? TextInputType.number
-                  : TextInputType.text,
+              keyboardType: textInputType,
+              obscureText: obscure,
               enabled: widget.isEnable,
               focusNode: _focusNode,
               controller: widget.controller,
-              style: const TextStyle(fontSize: 22, color: Color(0xff000000)),
+              style: TextStyle(
+                  fontSize: 22,
+                  color: widget.isSuccessVerifyCode
+                      ? const Color(0xFFCCCCCC)
+                      : const Color(0xff000000)),
               decoration: InputDecoration(
                   hintText: widget.placeHolderText,
                   hintStyle: const TextStyle(color: Color(0xffCCCCCC)),
@@ -213,6 +229,10 @@ class _SigneUpScreenTextFieldState extends State<SigneUpScreenTextField> {
                         BorderSide(color: Color(0xffCCCCCC)), // 포커스가 있을 때의 색상
                   ),
                   enabledBorder: const UnderlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xffCCCCCC)), // 활성 상태일 때의 색상
+                  ),
+                  disabledBorder: const UnderlineInputBorder(
                     borderSide:
                         BorderSide(color: Color(0xffCCCCCC)), // 비활성 상태일 때의 색상
                   )),
@@ -231,7 +251,8 @@ class _SigneUpScreenTextFieldState extends State<SigneUpScreenTextField> {
                                   : const Color(0x00000000)),
                         ))),
                 Visibility(
-                    visible: widget.buttonText.isNotEmpty,
+                    visible: widget.buttonText.isNotEmpty &&
+                        widget.isSuccessVerifyCode == false,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 15),
                       child: Row(
@@ -264,7 +285,8 @@ class SignUpButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding:
+            const EdgeInsets.only(left: 24, right: 24, bottom: 16, top: 16),
         child: commonButton(
             onPressed: onPressed,
             width: double.infinity,

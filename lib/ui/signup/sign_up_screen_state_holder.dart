@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_srt_seungpil/ui/base/base_state_holder.dart';
 import 'package:flutter_srt_seungpil/ui/signup/sign_up_screen_view_model.dart';
 
 import '../common/common_dialog.dart';
+import '../util/log.dart';
 
-class SignUpScreenStateHolder {
+class SignUpScreenStateHolder extends BaseStateHolder{
   TextEditingController idController = TextEditingController();
   TextEditingController codeController = TextEditingController();
   TextEditingController nameController = TextEditingController();
@@ -41,8 +43,8 @@ class SignUpScreenStateHolder {
               BuildContext context)
           requestSignUp,
       bool isVerifyCode,
-      bool completeSignUp,
       BuildContext context) {
+    Log.d(message: "$isVerifyCode $isPwdSuccess $isVerifyPwdSuccess}", name: "spspsp");
     if (isVerifyCode && isPwdSuccess && isVerifyPwdSuccess) {
       requestSignUp(nameController.text, confirmPwdController.text,
           idController.text, birthController.text, context);
@@ -68,23 +70,24 @@ class SignUpScreenStateHolder {
     }
   }
 
-  void showErrorDialog(BuildContext context, bool visible,
-      Function() errorDialogDismissAction, String message) {
-    if (visible) {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        showDialog(
-            context: context,
-            builder: (context) {
-              return commonDialog(context, content: message,
-                  positiveAction: () {
-                errorDialogDismissAction;
-              });
-            });
-      });
-    }
-  }
+  // void showErrorDialog(BuildContext context, bool visible,
+  //     Function() errorDialogDismissAction, String message) {
+  //   if (visible) {
+  //     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+  //       showDialog(
+  //           context: context,
+  //           builder: (context) {
+  //             return commonDialog(context, content: message,
+  //                 positiveAction: () {
+  //               errorDialogDismissAction;
+  //             });
+  //           });
+  //     });
+  //   }
+  // }
 
   void updateSignUpTask(String title) {
+    Log.d(message: confirmPwdController.text ,name: "비밀번호 확인/");
     switch (title) {
       case "비밀번호":
         if (pwdController.text.length >= 8) {

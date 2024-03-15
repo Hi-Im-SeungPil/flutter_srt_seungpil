@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Utils {
   static void push(BuildContext context, Widget target) {
@@ -13,4 +14,8 @@ class Utils {
   static void pop(BuildContext context) {
     Navigator.pop(context);
   }
+}
+
+AppLocalizations getStrings(BuildContext context) {
+return AppLocalizations.of(context)!;
 }
