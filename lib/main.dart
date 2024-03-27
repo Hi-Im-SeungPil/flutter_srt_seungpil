@@ -14,8 +14,6 @@ class SrtApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: AppTheme().lightColors,
-        darkTheme: AppTheme().darkColors,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,

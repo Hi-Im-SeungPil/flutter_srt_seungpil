@@ -11,7 +11,5 @@ class SignUpScreenRoute extends StatelessWidget {
     return ChangeNotifierProvider(
         create: (BuildContext context) => SignUpScreenViewModel(),
         child: const SignUpScreen());
-
-
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_srt_seungpil/constants/constants.dart';
 import 'package:flutter_srt_seungpil/ui/login/login_state_holder.dart';
@@ -105,12 +103,7 @@ class _LoginScreenTextFieldState extends State<LoginScreenTextField> {
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () {
-      textFieldMargin = widget.identityText ==
-              getStrings(context as BuildContext).login_screen_text_id
-          ? 97
-          : 12;
-    });
+    textFieldMargin = widget.identityText == "ID" ? 97 : 12;
     super.initState();
   }
 
@@ -156,7 +149,7 @@ class _LoginScreenTextFieldState extends State<LoginScreenTextField> {
 class LoginScreenButton extends StatelessWidget {
   final Function() requestLogin;
 
-  LoginScreenButton({super.key, required this.requestLogin});
+  const LoginScreenButton({super.key, required this.requestLogin});
 
   @override
   Widget build(BuildContext context) {

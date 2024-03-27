@@ -5,6 +5,7 @@ import 'package:flutter_srt_seungpil/data/network/model/request/login_req.dart';
 import 'package:flutter_srt_seungpil/data/network/model/response/login_res.dart';
 import 'package:flutter_srt_seungpil/ui/base/base_view_model.dart';
 import 'package:flutter_srt_seungpil/ui/home/home_screen.dart';
+import 'package:flutter_srt_seungpil/ui/home/home_screen_route.dart';
 import 'package:flutter_srt_seungpil/ui/util/manager/preferences_manager.dart';
 
 import '../../constants/keys.dart';
@@ -27,7 +28,7 @@ class LoginScreenViewModel extends BaseViewModel {
         } else {
           PreferencesManager.removeData(Keys.PREF_KEY_SAVED_ID);
         }
-        Utils.pushAndRemoveUntil(context, const HomeScreen());
+        Utils.pushAndRemoveUntil(context, const HomeScreenRoute());
       } else {
         baseErrorMessage = loginRes.message;
         baseShowErrorDialog = true;

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_srt_seungpil/constants/url.dart';
 import 'package:flutter_srt_seungpil/data/network/model/request/send_email_code_req.dart';
 import 'package:flutter_srt_seungpil/data/network/model/request/sign_up_req.dart';
+import 'package:flutter_srt_seungpil/data/network/model/request/time_table_req.dart';
 import 'package:flutter_srt_seungpil/data/network/model/request/verify_code_req.dart';
 import 'package:flutter_srt_seungpil/data/network/api_result.dart';
 
@@ -37,6 +38,16 @@ class NetworkRepository {
   /// 로그인 요청
   void requestLogin(LoginReq loginReq) {
     call(URL_REQ_LOGIN, params: loginReq.toMap());
+  }
+
+  /// request srtInfo
+  void requestSrtInfo() {
+    call(URL_REQ_SRT_INFO);
+  }
+
+  /// 기차 조회하기
+  void requestSrtTimeTable(TimeTableReq timeTableReq) {
+    call(URL_REQ_SRT_TIME_TABLE, params: timeTableReq.toMap());
   }
 
   /// 통신 로직

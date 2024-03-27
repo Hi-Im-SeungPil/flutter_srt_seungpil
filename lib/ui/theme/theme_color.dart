@@ -5,7 +5,7 @@ class AppTheme {
         colorScheme: const ColorScheme(
             brightness: Brightness.light,
             primary: Color(0xFF000000),
-            onPrimary: Color(0xFFFFFFFF),
+            onPrimary: Color(0xFF000000),
             secondary: Color(0xFFFFFFFF),
             onSecondary: Color(0xFFFFFFFF),
             error: Color(0xFFFFFFFF),
@@ -20,8 +20,8 @@ class AppTheme {
     ThemeData darkColors = ThemeData(
         colorScheme: const ColorScheme(
             brightness: Brightness.dark,
-            primary: Color(0xFFFFFFFF),
-            onPrimary: Color(0xFFFFFFFF),
+            primary: Color(0xFF000000),
+            onPrimary: Color(0xFF000000),
             secondary: Color(0xFFFFFFFF),
             onSecondary: Color(0xFFFFFFFF),
             error: Color(0xFFFFFFFF),
