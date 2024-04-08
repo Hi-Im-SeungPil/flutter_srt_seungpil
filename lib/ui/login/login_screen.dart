@@ -17,31 +17,32 @@ class LoginScreen extends StatelessWidget {
       holder.showErrorDialog(context, viewModel.showErrorDialog,
           viewModel.errorDialogDismissAction, viewModel.errorMessage);
       return Scaffold(
+          resizeToAvoidBottomInset: false,
           body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const OpenObjectLogo(),
-            const SRTLogo(),
-            LoginScreenTextField(
-                textEditingController: holder.idEditingController,
-                identityText: getStrings(context).login_screen_text_id),
-            LoginScreenTextField(
-                textEditingController: holder.pwdEditingController,
-                identityText: getStrings(context).login_screen_text_pw),
-            LoginScreenButton(requestLogin: () {
-              holder.loginButtonAction(viewModel.requestLogin, context);
-            }),
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                LoginScreenCheckBox(stateHolder: holder),
-                const Expanded(flex: 1, child: Spacer()),
-                const LoginScreenSignUp()
+                const OpenObjectLogo(),
+                const SRTLogo(),
+                LoginScreenTextField(
+                    textEditingController: holder.idEditingController,
+                    identityText: getStrings(context).login_screen_text_id),
+                LoginScreenTextField(
+                    textEditingController: holder.pwdEditingController,
+                    identityText: getStrings(context).login_screen_text_pw),
+                LoginScreenButton(requestLogin: () {
+                  holder.loginButtonAction(viewModel.requestLogin, context);
+                }),
+                Row(
+                  children: [
+                    LoginScreenCheckBox(stateHolder: holder),
+                    const Expanded(flex: 1, child: Spacer()),
+                    const LoginScreenSignUp()
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-      ));
+          ));
     });
   }
 }

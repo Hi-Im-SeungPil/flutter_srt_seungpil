@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_srt_seungpil/constants/keys.dart';
 import 'package:flutter_srt_seungpil/ui/home/home_screen_state_holder.dart';
-import 'package:flutter_srt_seungpil/ui/util/log.dart';
 
 class SelectionScreenStateHolder extends ChangeNotifier {
   late final Map<String, dynamic>? receivedData;
@@ -10,12 +10,18 @@ class SelectionScreenStateHolder extends ChangeNotifier {
   String destinationStationCode = emptyStringValue;
   String destinationStationName = "";
 
-  SelectionScreenStateHolder ({required this.receivedData}) {
-    isDepartureStation = receivedData?['isDeparture'] ?? true;
-    departureStationName = receivedData?['departureStationName'] ?? "";
-    departureStationCode = receivedData?['departureStationCode'] ?? emptyStringValue;
-    destinationStationCode = receivedData?['destinationStationCode'] ?? emptyStringValue;
-    destinationStationName = receivedData?['destinationStationName'] ?? "";
+  SelectionScreenStateHolder({required this.receivedData}) {
+    isDepartureStation = receivedData?[Keys.PUSH_DATA_KEY_IS_DEPARTURE] ?? true;
+    departureStationName =
+        receivedData?[Keys.PUSH_DATA_KEY_DEPARTURE_STATION_NAME] ?? "";
+    departureStationCode =
+        receivedData?[Keys.PUSH_DATA_KEY_DEPARTURE_STATION_CODE] ??
+            emptyStringValue;
+    destinationStationCode =
+        receivedData?[Keys.PUSH_DATA_KEY_DESTINATION_STATION_CODE] ??
+            emptyStringValue;
+    destinationStationName =
+        receivedData?[Keys.PUSH_DATA_KEY_DESTINATION_STATION_NAME] ?? "";
     notifyListeners();
   }
 
@@ -25,47 +31,46 @@ class SelectionScreenStateHolder extends ChangeNotifier {
       if (stationCode == departureStationCode) {
         departureStationCode = emptyStringValue;
         departureStationName = "";
-      } else {
+      } else if (stationCode != destinationStationCode) {
         departureStationCode = stationCode;
         departureStationName = stationName;
       }
-      // isDepartureStation = false;
-      Log.d(message: departureStationCode, name: "departure");
     } else {
       if (stationCode == destinationStationCode) {
         destinationStationCode = emptyStringValue;
         destinationStationName = "";
-      } else {
+      } else if (stationCode != departureStationCode) {
         destinationStationCode = stationCode;
         destinationStationName = stationName;
       }
-      // isDepartureStation = true;
-      Log.d(message: destinationStationCode, name: "destination");
     }
     notifyListeners();
   }
 
   /// 출발 <-> 도착 변경
   void convertStation() {
-    String tempDepartureStationCode = departureStationCode;
-    departureStationCode = destinationStationCode;
-    destinationStationCode = tempDepartureStationCode;
+    if (departureStationName.isNotEmpty && destinationStationName.isNotEmpty) {
+      String tempDepartureStationCode = departureStationCode;
+      departureStationCode = destinationStationCode;
+      destinationStationCode = tempDepartureStationCode;
 
-    String tempDepartureStationName = departureStationName;
-    departureStationName = destinationStationName;
-    destinationStationName = tempDepartureStationName;
+      String tempDepartureStationName = departureStationName;
+      departureStationName = destinationStationName;
+      destinationStationName = tempDepartureStationName;
 
-    notifyListeners();
+      notifyListeners();
+    }
   }
 
   /// 선택역 초기화를 위해
   String getSelectStation() {
     if (isDepartureStation && departureStationCode != emptyStringValue) {
       return departureStationCode;
-    } else if (!isDepartureStation && destinationStationCode != emptyStringValue) {
+    } else if (!isDepartureStation &&
+        destinationStationCode != emptyStringValue) {
       return destinationStationCode;
     } else {
-      return "-1";
+      return emptyStringValue;
     }
   }
 
@@ -83,11 +88,19 @@ class SelectionScreenStateHolder extends ChangeNotifier {
   /// 역 선택 하고 다시 돌아갈 때
   void selectCompleteAction(BuildContext context) {
     Map<String, dynamic> data = {
-      'departureStationCode': departureStationCode,
-      'departureStationName': departureStationName,
-      'destinationStationCode': destinationStationCode,
-      'destinationStationName': destinationStationName,
+      Keys.PUSH_DATA_KEY_DEPARTURE_STATION_CODE: departureStationCode,
+      Keys.PUSH_DATA_KEY_DEPARTURE_STATION_NAME: departureStationName,
+      Keys.PUSH_DATA_KEY_DESTINATION_STATION_CODE: destinationStationCode,
+      Keys.PUSH_DATA_KEY_DESTINATION_STATION_NAME: destinationStationName,
     };
     Navigator.pop(context, data);
+  }
+
+  bool isSelectButtonEnabled() {
+    if (departureStationName.isNotEmpty && destinationStationName.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

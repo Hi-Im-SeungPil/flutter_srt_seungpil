@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_srt_seungpil/ui/login/login_screen_route.dart';
@@ -24,6 +25,7 @@ class SrtApp extends StatelessWidget {
           Locale('ko', ''), // Korean, no country code
         ],
         home: Scaffold(
+
           body: const LoginScreenRoute(),
           backgroundColor: Theme.of(context).colorScheme.background,
         ));

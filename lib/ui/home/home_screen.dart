@@ -14,7 +14,6 @@ import 'package:flutter_srt_seungpil/ui/util/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import '../../constants/constants.dart';
 import '../../constants/url.dart';
 
@@ -60,13 +59,18 @@ class _HomeScreenState extends State<HomeScreen> {
             recentReservationList: viewModel.srtInfoRes?.recentReservationList),
         HomeScreenTextField(
             textEditingController: holder.selectDateController,
-            identityText: getStrings(context).home_screen_date),
+            identityText: getStrings(context).home_screen_date,
+            dateSelectCompleteAction: holder.dateSelectCompleteAction,
+            getLastSelectDate: holder.getLastSelectDate,
+            getSelectTime: holder.getLastSelectTime),
         HomeScreenTextField(
-            textEditingController: holder.selectPersonCountController,
-            identityText: getStrings(context).home_screen_people_count),
+          textEditingController: holder.selectPersonCountController,
+          identityText: getStrings(context).home_screen_people_count,
+          getPersonCount: holder.getPersonCount,
+          setPersonCount: holder.setPersonCount,
+        ),
         HomeScreenSearchButton(
             buttonEnabled: buttonEnabled,
-            requestSrtTimeTable: viewModel.requestSrtTimeTable,
             searchSrtButtonAction: holder.searchSrtButtonAction),
         HomeScreenNoticeBoard(noticeList: viewModel.srtInfoRes?.noticeList),
         AutoScrollPageView(bannerList: viewModel.srtInfoRes?.bannerList),
@@ -198,7 +202,7 @@ class _SelectBoxState extends State<SelectBox> {
                     flex: 1,
                     child: GestureDetector(
                       child: Padding(
-                          padding: EdgeInsets.only(left: 30),
+                          padding: const EdgeInsets.only(left: 30),
                           child: SelectedBoxTextColumn(
                               title: getStrings(context)
                                   .home_screen_departure_station,
@@ -333,12 +337,20 @@ class HomeScreenTextField extends StatefulWidget {
   final TextEditingController textEditingController;
   final String identityText;
   void Function(int selectedIndex)? setPersonCount;
+  Function(DateTime selectedDay, int selecTime)? dateSelectCompleteAction;
+  DateTime Function()? getLastSelectDate;
+  int Function()? getSelectTime;
+  int Function()? getPersonCount;
 
   HomeScreenTextField(
       {super.key,
       required this.textEditingController,
       required this.identityText,
-      this.setPersonCount});
+      this.setPersonCount,
+      this.dateSelectCompleteAction,
+      this.getLastSelectDate,
+      this.getSelectTime,
+      this.getPersonCount});
 
   @override
   State<HomeScreenTextField> createState() => _HomeScreenTextFieldState();
@@ -391,10 +403,15 @@ class _HomeScreenTextFieldState extends State<HomeScreenTextField> {
           ),
           onTap: () {
             if (widget.identityText == "인원 수") {
-              showPersonCountBottomSheet(
-                  context, widget.textEditingController, widget.setPersonCount);
+              showPersonCountBottomSheet(context, widget.textEditingController,
+                  widget.setPersonCount, widget.getPersonCount);
             } else {
-              showCalendarBottomSheet(context, widget.textEditingController);
+              showCalendarBottomSheet(
+                  context,
+                  widget.textEditingController,
+                  widget.dateSelectCompleteAction,
+                  widget.getLastSelectDate,
+                  widget.getSelectTime);
             }
           },
         ));
@@ -402,18 +419,23 @@ class _HomeScreenTextFieldState extends State<HomeScreenTextField> {
 }
 
 Future<dynamic> showCalendarBottomSheet(
-    BuildContext context, TextEditingController controller) {
+    BuildContext context,
+    TextEditingController controller,
+    Function(DateTime selectedDay, int selecTime)? dateSelectCompleteAction,
+    DateTime Function()? getLastSelectDate,
+    int Function()? getSelectTime) {
   DateTime now = DateTime.now();
   DateTime firstDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  DateTime lastDay = DateTime(DateTime.now().year + 1);
-  DateTime currentVisible = DateTime.now();
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime? _selectedDay;
+  DateTime lastDay = DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day + 30);
+  DateTime _selectedDay = getLastSelectDate!();
+  int selectTimeIndex = getSelectTime!();
+  ScrollController scrollController =
+      ScrollController(initialScrollOffset: selectTimeIndex * 60);
 
   return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      // useSafeArea: true,
       builder: (BuildContext context) {
         return Wrap(children: [
           StatefulBuilder(
@@ -440,7 +462,7 @@ Future<dynamic> showCalendarBottomSheet(
                       )
                     ])),
                 Padding(
-                    padding: EdgeInsets.only(left: 24, right: 24),
+                    padding: const EdgeInsets.only(left: 24, right: 24),
                     child: TableCalendar(
                         focusedDay: now,
                         firstDay: firstDay,
@@ -450,23 +472,27 @@ Future<dynamic> showCalendarBottomSheet(
                         availableCalendarFormats: const {
                           CalendarFormat.month: 'Month'
                         },
+                        calendarStyle: const CalendarStyle(
+                            selectedDecoration: BoxDecoration(
+                          color: Color(0xff383B5A),
+                          shape: BoxShape.circle,
+                        )),
                         headerStyle: const HeaderStyle(
                             formatButtonVisible: false, titleCentered: true),
-                        // onFormatChanged: (format) {
-                        //   if (_calendarFormat != format) {
-                        //     bottomState(() {
-                        //       _calendarFormat = format;
-                        //     });
-                        //   }
-                        // },
                         onDaySelected: (selectedDay, focusedDay) {
-                          if (selectedDay.isBefore(
-                              DateTime.now().subtract(const Duration(days: 1))))
+                          if (selectedDay.isBefore(DateTime.now()
+                              .subtract(const Duration(days: 1)))) {
                             return;
+                          }
                           if (!isSameDay(_selectedDay, selectedDay)) {
                             bottomState(() {
+                              if (isSameDay(selectedDay, now) &&
+                                  now.hour >= selectTimeIndex) {
+                                selectTimeIndex = now.hour;
+                                scrollController
+                                    .jumpTo(60 * now.hour.toDouble());
+                              }
                               _selectedDay = selectedDay;
-                              now = focusedDay;
                             });
                           }
                         },
@@ -486,30 +512,46 @@ Future<dynamic> showCalendarBottomSheet(
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal, // 가로 스크롤 설정
                         itemCount: 24,
+                        controller: scrollController,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
                             margin: const EdgeInsets.only(right: 8),
                             height: 38,
                             decoration: BoxDecoration(
                                 border: Border.all(
-                              width: 1,
-                              color: Colors.black26,
-                            )),
+                                  width: 1,
+                                  color: const Color(0xffdddddd),
+                                ),
+                                color: selectTimeIndex == index
+                                    ? const Color(0xff476EFF)
+                                    : const Color(0xffffffff)),
                             child: GestureDetector(
                               child: Center(
                                   child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 14),
                                 child: Text(
-                                  '${index} 시',
-                                  style: const TextStyle(
-                                    color: Color(0xff494F60),
+                                  '$index 시',
+                                  style: TextStyle(
+                                    color: _selectedDay.isAfter(now) ||
+                                            isSameDay(_selectedDay, now) &&
+                                                now.hour <= index
+                                        ? selectTimeIndex == index
+                                            ? const Color(0xffffffff)
+                                            : const Color(0xff050F26)
+                                        : const Color(0xffcccccc),
                                     fontSize: 14,
                                   ),
                                 ),
                               )),
                               onTap: () {
-                                bottomState(() {});
+                                bottomState(() {
+                                  if (_selectedDay.isAfter(now) ||
+                                      isSameDay(_selectedDay, now) &&
+                                          now.hour <= index) {
+                                    selectTimeIndex = index;
+                                  }
+                                });
                               },
                             ),
                           );
@@ -517,9 +559,14 @@ Future<dynamic> showCalendarBottomSheet(
                       )),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, top: 27, bottom: 16),
+                  padding: const EdgeInsets.only(
+                      left: 16, right: 16, top: 27, bottom: 16),
                   child: commonButton(
                       onPressed: () {
+                        if (dateSelectCompleteAction != null) {
+                          dateSelectCompleteAction(
+                              _selectedDay!, selectTimeIndex);
+                        }
                         Navigator.pop(context);
                       },
                       width: double.infinity,
@@ -536,8 +583,9 @@ Future<dynamic> showCalendarBottomSheet(
 Future<dynamic> showPersonCountBottomSheet(
     BuildContext context,
     TextEditingController controller,
-    void Function(int selectedIndex)? setPersonCount) {
-  int currentSelectedIndex = -1;
+    void Function(int selectedIndex)? setPersonCount,
+    int Function()? getPersonCount) {
+  int currentSelectedIndex = getPersonCount!() - 1;
   return showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -643,16 +691,11 @@ Future<dynamic> showPersonCountBottomSheet(
 
 class HomeScreenSearchButton extends StatelessWidget {
   bool buttonEnabled;
-  void Function(String depPlaceId, String arrPlaceId, String depPlandDate,
-      String depPlandTime) requestSrtTimeTable;
-  void Function(
-      Function(String depPlaceId, String arrPlaceId, String depPlandDate,
-          String depPlandTime)) searchSrtButtonAction;
+  void Function(BuildContext context) searchSrtButtonAction;
 
   HomeScreenSearchButton(
       {super.key,
       required this.buttonEnabled,
-      required this.requestSrtTimeTable,
       required this.searchSrtButtonAction});
 
   @override
@@ -665,16 +708,16 @@ class HomeScreenSearchButton extends StatelessWidget {
             child: TextButton(
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(
-                      buttonEnabled ? Color(0xFF476EFF) : Colors.black26),
+                      buttonEnabled ? const Color(0xFF476EFF) : Colors.black26),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8)))),
                 ),
-                onPressed: () {
-                  if (buttonEnabled) {
-                    searchSrtButtonAction(requestSrtTimeTable);
-                  }
-                },
+                onPressed: buttonEnabled
+                    ? () {
+                        searchSrtButtonAction(context);
+                      }
+                    : null,
                 child: Text(getStrings(context).home_screen_search_srt,
                     style: const TextStyle(
                         color: Color(0xffffffff), fontSize: 16)))));
@@ -713,8 +756,8 @@ class HomeScreenNoticeBoard extends StatelessWidget {
                           )),
                     ),
                     const Image(
-                        image:
-                            AssetImage('${Constants.IMAGE_PATH}ico_arrow_r.png'),
+                        image: AssetImage(
+                            '${Constants.IMAGE_PATH}ico_arrow_r.png'),
                         width: 20,
                         height: 20)
                   ],
@@ -730,7 +773,7 @@ class HomeScreenNoticeBoard extends StatelessWidget {
 class AutoScrollPageView extends StatefulWidget {
   final List<BannerList>? bannerList;
 
-  AutoScrollPageView({required this.bannerList});
+  const AutoScrollPageView({super.key, required this.bannerList});
 
   @override
   _AutoScrollPageViewState createState() => _AutoScrollPageViewState();
@@ -745,7 +788,8 @@ class _AutoScrollPageViewState extends State<AutoScrollPageView> {
   void initState() {
     super.initState();
     Timer.periodic(const Duration(seconds: 5), (Timer timer) {
-      if (_currentPageIndex < 2) {
+      if (widget.bannerList != null &&
+          _currentPageIndex < widget.bannerList!.length - 1) {
         _currentPageIndex++;
       } else {
         _currentPageIndex = 0;
@@ -774,37 +818,93 @@ class _AutoScrollPageViewState extends State<AutoScrollPageView> {
             SizedBox(
               width: double.infinity,
               height: 160,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: widget.bannerList?.length ?? 0,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                      child: Image.network(
-                          "http://dpms.openobject.net:4132${widget.bannerList?[index].imgUrl ?? 0}",
-                          width: 300,
-                          height: 150),
-                      onTap: () {
-                        if (widget.bannerList != null) {
-                          Utils.urlLauncher(widget.bannerList![index].linkUrl);
-                        }
-                      });
-                },
-              ),
+              child: Stack(children: [
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: (widget.bannerList?.length ?? 0),
+                      scrollDirection: Axis.horizontal,
+                      onPageChanged: (int page) {
+                        setState(() {
+                          _currentPageIndex = page;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                            child: Image.network(
+                                "http://dpms.openobject.net:4132${widget.bannerList?[index].imgUrl ?? 0}",
+                                width: 300,
+                                height: 150),
+                            onTap: () {
+                              if (widget.bannerList != null) {
+                                Utils.urlLauncher(
+                                    widget.bannerList![index].linkUrl);
+                              }
+                            });
+                      },
+                    )),
+                Visibility(
+                    visible: _currentPageIndex != 0,
+                    child: Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: GestureDetector(
+                        child: const Image(
+                          image: AssetImage(
+                              '${Constants.IMAGE_PATH}img_left_circle.png'),
+                          width: 24,
+                          height: 24,
+                        ),
+                        onTap: () {
+                          _pageController.previousPage(
+                              duration: const Duration(milliseconds: 350),
+                              curve: Curves.easeIn);
+                        },
+                      ),
+                    )),
+                Visibility(
+                    visible: widget.bannerList != null &&
+                        _currentPageIndex != widget.bannerList!.length - 1,
+                    child: Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: GestureDetector(
+                        child: const Image(
+                          image: AssetImage(
+                              '${Constants.IMAGE_PATH}img_arror_circle_r.png'),
+                          width: 24,
+                          height: 24,
+                        ),
+                        onTap: () {
+                          _pageController.nextPage(
+                              duration: const Duration(milliseconds: 350),
+                              curve: Curves.easeIn);
+                        },
+                      ),
+                    ))
+              ]),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 16),
               child: SmoothPageIndicator(
                   controller: _pageController,
                   count: widget.bannerList?.length ?? 0,
-                  effect: ExpandingDotsEffect(
+                  effect: const ExpandingDotsEffect(
                       activeDotColor: Color(0xff383B5A),
                       dotColor: Color(0xffDDDDDD),
                       radius: 2,
                       dotHeight: 4,
                       dotWidth: 4),
-                  // your preferred effect
-                  onDotClicked: (index) {}),
+                  onDotClicked: (index) {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeIn,
+                    );
+                  }),
             )
           ],
         ));
@@ -825,9 +925,9 @@ class HomeScreenTermsOfService extends StatelessWidget {
               fontSize: 12,
               decoration: TextDecoration.underline,
               decorationColor: Color(0xff666666),
-              // 밑줄 색상
+// 밑줄 색상
               decorationStyle: TextDecorationStyle.solid,
-              // 밑줄 스타일
+// 밑줄 스타일
               decorationThickness: 1.0, // 밑줄 두께),
             )),
         onTap: () {

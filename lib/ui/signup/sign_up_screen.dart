@@ -113,7 +113,7 @@ class SigneUpScreenTextField extends StatefulWidget {
   bool isEnable;
   bool isSuccessVerifyCode;
 
-  SigneUpScreenTextField(
+   SigneUpScreenTextField(
       {super.key,
       required this.textFieldTitle,
       required this.placeHolderText,

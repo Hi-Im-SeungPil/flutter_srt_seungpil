@@ -10,6 +10,6 @@ class HomeScreenRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
         create: (BuildContext context) => HomeScreenViewModel(),
-        child: HomeScreen());
+        child: const HomeScreen());
   }
 }

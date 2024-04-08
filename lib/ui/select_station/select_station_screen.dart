@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../constants/constants.dart';
 import '../../data/local/json/srt_station_model.dart';
-import '../common/common_button.dart';
 import '../util/utils.dart';
 
 class SelectStationScreen extends StatelessWidget {
@@ -25,7 +24,7 @@ class SelectStationScreen extends StatelessWidget {
           appBar: AppBar(
             toolbarHeight: 56,
             centerTitle: true,
-            title: const Text('${'역 선택'}',
+            title: const Text('역 선택',
                 style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
@@ -62,15 +61,29 @@ class SelectStationScreen extends StatelessWidget {
                 )),
               ),
               Container(
-                padding: const EdgeInsets.all(16),
-                child: commonButton(
-                    onPressed: () {
-                      holder.selectCompleteAction(context);
-                    },
-                    width: double.infinity,
-                    height: 48,
-                    buttonText: "선택완료"),
-              )
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: TextButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                holder.isSelectButtonEnabled()
+                                    ? Color(0xFF476EFF)
+                                    : Color(0xFFD0DAE6)),
+                            shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)))),
+                          ),
+                          onPressed: holder.isSelectButtonEnabled()
+                              ? () {
+                                  holder.selectCompleteAction(context);
+                                }
+                              : null,
+                          child: const Text("선택완료",
+                              style: TextStyle(color: Color(0xffffffff))))))
             ],
           ));
     }));
@@ -142,8 +155,8 @@ class _SelectBoxState extends State<SelectBox> {
                     child: const Padding(
                       padding: EdgeInsets.only(left: 43.5, right: 43.5),
                       child: Image(
-                        image: AssetImage(
-                            '${Constants.IMAGE_PATH}img_transf.png'),
+                        image:
+                            AssetImage('${Constants.IMAGE_PATH}img_transf.png'),
                       ),
                     ),
                     onTap: () {
