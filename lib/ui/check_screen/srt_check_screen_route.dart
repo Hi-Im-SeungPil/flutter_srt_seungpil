@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_srt_seungpil/ui/check_screen/srt_check_screen.dart';
 import 'package:flutter_srt_seungpil/ui/check_screen/srt_check_view_model.dart';

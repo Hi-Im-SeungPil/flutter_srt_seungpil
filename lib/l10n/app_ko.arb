@@ -1,6 +1,11 @@
 {
   "@@locale": "ko",
   "common_confirm" : "확인",
+  "common_name" : "이름",
+  "common_phone_num" : "휴대폰번호",
+  "common_pwd" : "비밀번호",
+  "common_pwd_confirm" : "비밀번호 확인",
+  "common_success" : "완료",
 
   "login_screen_text_id" :"ID",
   "login_screen_text_pw" :"PW",
@@ -31,5 +36,21 @@
   "home_screen_people_count" : "인원 수",
   "home_screen_search_srt" : "기차 조회하기",
   "home_screen_reserve_terms" : "예매 서비스 이용약관",
-  "home_screen_warning_text" : "통신판매중개자로, 통신판매의 당사자가 아닙니다\n예매 및 환불 등 거래에 대한 의무와 책임은 거래 당사자인\n한국철도공사에 있습니다."
+  "home_screen_warning_text" : "통신판매중개자로, 통신판매의 당사자가 아닙니다\n예매 및 환불 등 거래에 대한 의무와 책임은 거래 당사자인\n한국철도공사에 있습니다.",
+
+  "reservation_screen_title" : "예매 고객 정보 입력",
+  "reservation_screen_name_hint" : "김*픈",
+  "reservation_screen_name_error" : "이름은 필수 입력입니다.",
+  "reservation_screen_phone_num" : "휴대폰번호",
+  "reservation_screen_phone_num_hint" : "01012**56**",
+  "reservation_screen_phone_num_error" : "휴대폰번호는 필수 입력입니다.",
+  "reservation_screen_pwd_hint" : "숫자 5자리",
+  "reservation_screen_pwd_error" : "비밀번호는 5자리 이상입니다.",
+  "reservation_screen_pwd_confirm_hint" : "숫자 5자리",
+  "reservation_screen_pwd_confirm_error" : "비밀번호가 일치하지 않습니다.",
+  "reservation_screen_terms_title" : "약관에 동의 해주세요.",
+  "reservation_screen_terms_all_agree" : "전체동의",
+  "reservation_screen_terms_personal_info_using" : "[필수] 개인정보 수집 및 이용 동의",
+  "reservation_screen_terms_personal_info_provide" : "[필수] 개인정보 제공 동의",
+  "reservation_screen_terms_marketing" : "[필수] 마케팅 정보 수신 동의"
 }

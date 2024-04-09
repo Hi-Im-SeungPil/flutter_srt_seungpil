@@ -10,24 +10,23 @@ import '../util/utils.dart';
 
 class _HomeViewModelState {
   SrtTimeTableRes? srtTimeTableRes;
-  Map<String, dynamic>? receivedData;
+  Map<String, dynamic>? reservationInfo;
 }
 
 class SrtCheckScreenViewModel extends BaseViewModel {
   final _HomeViewModelState _state = _HomeViewModelState();
 
   SrtTimeTableRes? get srtTimeTableRes => _state.srtTimeTableRes;
-  Map<String, dynamic>? get receivedData => _state.receivedData;
+  Map<String, dynamic>? get receivedData => _state.reservationInfo;
 
   SrtCheckScreenViewModel({required Map<String, dynamic>? receivedData}) {
-    _state.receivedData = receivedData;
+    _state.reservationInfo = receivedData;
     String depPlaceId =
         receivedData?[Keys.PUSH_DATA_KEY_DEPARTURE_STATION_CODE];
     String arrPlaceId =
         receivedData?[Keys.PUSH_DATA_KEY_DESTINATION_STATION_CODE];
     DateTime depPlandDate = receivedData?[Keys.PUSH_DATA_KEY_SELECTED_DATE];
     String depPlandTime = receivedData?[Keys.PUSH_DATA_KEY_SELECTED_TIME];
-    Log.d(message: receivedData.toString(), name: "result2");
     requestSrtTimeTable(depPlaceId, arrPlaceId, Utils.depDateMapper(depPlandDate), "1300");
   }
 

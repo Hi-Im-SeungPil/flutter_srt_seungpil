@@ -440,8 +440,7 @@ Future<dynamic> showCalendarBottomSheet(
         return Wrap(children: [
           StatefulBuilder(
               builder: (BuildContext context, StateSetter bottomState) {
-            return Container(
-                child: Column(
+            return Column(
               children: [
                 Padding(
                     padding:
@@ -504,6 +503,7 @@ Future<dynamic> showCalendarBottomSheet(
                           Center(
                             child: Text(Utils.weekDayMapper(day.weekday)),
                           );
+                          return null;
                         }))),
                 Padding(
                   padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
@@ -574,7 +574,7 @@ Future<dynamic> showCalendarBottomSheet(
                       buttonText: "선택완료"),
                 )
               ],
-            ));
+            );
           })
         ]);
       });

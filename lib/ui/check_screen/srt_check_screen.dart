@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_srt_seungpil/constants/constants.dart';
 import 'package:flutter_srt_seungpil/data/network/model/response/srt_time_table_res.dart';
 import 'package:flutter_srt_seungpil/ui/check_screen/srt_check_view_model.dart';
+import 'package:flutter_srt_seungpil/ui/reservation/ReservationScreenRoute.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/keys.dart';
@@ -33,7 +34,9 @@ class SrtCheckScreen extends StatelessWidget {
                         ),
                         Expanded(
                             child: SrtTimeTable(
-                                srtTimeTableRes: viewModel.srtTimeTableRes))
+                          srtTimeTableRes: viewModel.srtTimeTableRes,
+                          reservationInfo: viewModel.receivedData,
+                        ))
                       ],
                     ))));
   }
@@ -131,8 +134,12 @@ class SearchInfoBox extends StatelessWidget {
 
 class SrtTimeTable extends StatefulWidget {
   SrtTimeTableRes? srtTimeTableRes;
+  final Map<String, dynamic>? reservationInfo;
 
-  SrtTimeTable({super.key, required this.srtTimeTableRes});
+  SrtTimeTable(
+      {super.key,
+      required this.srtTimeTableRes,
+      required this.reservationInfo});
 
   @override
   State<SrtTimeTable> createState() => _SrtTimeTableState();
@@ -236,28 +243,44 @@ class _SrtTimeTableState extends State<SrtTimeTable> {
                                     textAlign: TextAlign.center)),
                             Expanded(
                                 flex: 1,
-                                child: Center(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: const Color(0xffCCCCCC),
-                                        ),
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(6))),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 12),
-                                    margin: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: Text(
-                                      (trainInfo?.reserveYN ?? "") == "N"
-                                          ? '예매가능'
-                                          : '매진',
-                                      style: TextStyle(
-                                          color: (trainInfo?.reserveYN ?? "") ==
-                                                  "N"
-                                              ? Colors.black
-                                              : const Color(0xffCCCCCC),
-                                          fontSize: 12),
+                                child: GestureDetector(
+                                  onTap: (trainInfo?.reserveYN ?? "") == "N"
+                                      ? () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const ReservationScreenRoute(),
+                                                  settings: RouteSettings(
+                                                    arguments:
+                                                        widget.reservationInfo,
+                                                  )));
+                                        }
+                                      : null,
+                                  child: Center(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: const Color(0xffCCCCCC),
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(6))),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 12),
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                      child: Text(
+                                        (trainInfo?.reserveYN ?? "") == "N"
+                                            ? '예매가능'
+                                            : '매진',
+                                        style: TextStyle(
+                                            color:
+                                                (trainInfo?.reserveYN ?? "") ==
+                                                        "N"
+                                                    ? Colors.black
+                                                    : const Color(0xffCCCCCC),
+                                            fontSize: 12),
+                                      ),
                                     ),
                                   ),
                                 ))
